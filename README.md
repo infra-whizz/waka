@@ -1,6 +1,6 @@
-# Waka
+# Waka Image Baker
 
-Image baker ("waka" - blaze, burning fire in Swahili).
+Image assembler ("waka" - blaze, burning fire in Swahili) is here to create image appliances, using configuration management software design principles.
 
 Features (most TODO :wink:):
 
