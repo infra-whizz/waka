@@ -1,6 +1,7 @@
 package waka
 
 import (
+	"fmt"
 	"os"
 
 	wzlib_util "github.com/infra-whizz/wzlib/utils"
@@ -24,6 +25,14 @@ func (w *Waka) SetSchemaConfig(conf *nanoconf.Config) *Waka {
 
 // Prepare environment, make disks, mount
 func (w *Waka) prepare() {
+	err := NewWakaFSMake().SetSizeMb(500).Format("ext4")
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	os.Exit(wzlib_util.EX_GENERIC)
+}
+
+func (w *Waka) partitioning() {
 	os.Exit(wzlib_util.EX_GENERIC)
 }
 
@@ -45,6 +54,7 @@ func (w *Waka) cleanup() {
 // Build the image
 func (w *Waka) Build() {
 	w.prepare()
+	w.partitioning()
 	w.bootstrap()
 	w.runCMS()
 	w.cleanup()
