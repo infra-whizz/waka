@@ -1,15 +1,13 @@
 package waka
 
 import (
-	"fmt"
 	"os"
 
 	wzlib_util "github.com/infra-whizz/wzlib/utils"
-	"github.com/isbm/go-nanoconf"
 )
 
 type Waka struct {
-	conf *nanoconf.Config
+	layoutConfig *WkImageLayout
 }
 
 func NewWaka() *Waka {
@@ -17,18 +15,20 @@ func NewWaka() *Waka {
 	return w
 }
 
-// SetSchema for the image to be built
-func (w *Waka) SetSchemaConfig(conf *nanoconf.Config) *Waka {
-	w.conf = conf
+// SetSchemaPath to the image description and layout schema
+func (w *Waka) LoadSchema(schemaPath string) *Waka {
+	w.layoutConfig = NewWkImageLayout(schemaPath)
 	return w
 }
 
 // Prepare environment, make disks, mount
 func (w *Waka) prepare() {
-	err := NewWakaFSMake().SetSizeMb(500).Format("ext4")
-	if err != nil {
-		fmt.Println(err.Error())
-	}
+	/*
+		err := NewWakaFSMake().SetSizeMb(w.layoutConfig.conf.Size)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+	*/
 	os.Exit(wzlib_util.EX_GENERIC)
 }
 

@@ -16,7 +16,7 @@ func appDispatcher(ctx *cli.Context) error {
 		return fmt.Errorf("Error: Image schema path was not provided. Try --help, perhaps?\n")
 	}
 
-	waka.NewWaka().SetSchemaConfig(nanoconf.NewConfig(ctx.String("schema"))).Build()
+	waka.NewWaka().LoadSchema(ctx.String("schema")).Build()
 
 	cli.ShowAppHelpAndExit(ctx, 0)
 	return nil
