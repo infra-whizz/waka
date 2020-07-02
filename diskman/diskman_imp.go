@@ -105,6 +105,37 @@ func (dm *WkDiskManager) getDiskImageDevice() (string, error) {
 	return "", fmt.Errorf("No device found for %s disk", dm.getDiskName())
 }
 
-func (dm *WkDiskManager) addPartition(partition *waka_layout.WkLayoutConfPartition) {
-	dm.parted.Create(partition)
+func (dm *WkDiskManager) addPartition(partition *waka_layout.WkLayoutConfPartition) error {
+	return dm.parted.Create(partition)
+}
+
+func (dm *WkDiskManager) updateMountedDeviceMap() error {
+	device, err := dm.getDiskImageDevice()
+	if err != nil {
+		return err
+	}
+
+	cmd, err := wzlib_subprocess.BufferedExec("sfdisk", "-lJ", device)
+	if err != nil {
+		return err
+	}
+	out := cmd.StdoutString()
+	if err := cmd.Wait(); err != nil {
+		return err
+	}
+	var partTable map[string]map[string]interface{}
+	if err := json.Unmarshal([]byte(out), &partTable); err != nil {
+		return err
+	}
+
+	for partIdx, partInfo := range partTable["partitiontable"]["partitions"].([]interface{}) {
+		dm.imglt.GetConfig().Partitions[partIdx].SetDevice(partInfo.(map[string]interface{})["node"].(string))
+	}
+	return nil
+}
+
+func (dm *WkDiskManager) flushDeviceMap() {
+	for _, partition := range dm.imglt.GetConfig().Partitions {
+		partition.UnsetDevice()
+	}
 }

@@ -6,8 +6,8 @@ import (
 	"path"
 
 	waka_parted "github.com/infra-whizz/waka/diskman/parted"
-
 	waka_layout "github.com/infra-whizz/waka/layout"
+	wzlib_utils "github.com/infra-whizz/wzlib/utils"
 )
 
 /*
@@ -60,7 +60,13 @@ func (dm *WkDiskManager) Remove() error {
 func (dm *WkDiskManager) MakePartitions() error {
 	for partId, partMeta := range dm.getDiskLayoutConfig().Partitions {
 		partId++
-		dm.addPartition(partMeta)
+		if err := dm.addPartition(partMeta); err != nil {
+			return err
+		}
+	}
+	if err := dm.updateMountedDeviceMap(); err != nil {
+		fmt.Fprintln(os.Stderr, "ERROR:", err.Error())
+		os.Exit(wzlib_utils.EX_GENERIC)
 	}
 	return nil
 }
@@ -92,6 +98,9 @@ func (dm *WkDiskManager) Loop() error {
 		return err
 	}
 	dm.parted = waka_parted.NewWakaPartitionerGPT(dm.imglt.GetConfig().Os, diskDevice)
+	if err := dm.updateMountedDeviceMap(); err != nil {
+		fmt.Println("ERROR update mounted device map:", err.Error())
+	}
 	fmt.Println("DEBUG: Mounted as", dm.parted.GetDiskDevice())
 	return nil
 }
@@ -116,5 +125,6 @@ func (dm *WkDiskManager) GetPartitionMountpoint(partname string) string {
 
 // Umount disks (all)
 func (dm *WkDiskManager) Umount() {
+	dm.flushDeviceMap()
 	dm.cleanup()
 }
