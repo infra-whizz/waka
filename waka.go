@@ -3,11 +3,12 @@ package waka
 import (
 	"os"
 
+	waka_layout "github.com/infra-whizz/waka/layout"
 	wzlib_util "github.com/infra-whizz/wzlib/utils"
 )
 
 type Waka struct {
-	layoutConfig *WkImageLayout
+	imageLayout *waka_layout.WkImageLayout
 }
 
 func NewWaka() *Waka {
@@ -17,14 +18,16 @@ func NewWaka() *Waka {
 
 // SetSchemaPath to the image description and layout schema
 func (w *Waka) LoadSchema(schemaPath string) *Waka {
-	w.layoutConfig = NewWkImageLayout(schemaPath)
+	w.imageLayout = waka_layout.NewWkImageLayout(schemaPath)
 	return w
 }
 
 // Prepare environment, make disks, mount
 func (w *Waka) prepare() {
+	//disk := NewWkDiskManager(w.imageLayout)
+
 	/*
-		err := NewWakaFSMake().SetSizeMb(w.layoutConfig.conf.Size)
+		err := NewWakaFSMake().SetSizeMb(w.imageLayout.conf.Size)
 		if err != nil {
 			fmt.Println(err.Error())
 		}

@@ -1,4 +1,4 @@
-package waka
+package waka_layout
 
 import (
 	"fmt"
