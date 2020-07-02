@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	wzlib_utils "github.com/infra-whizz/wzlib/utils"
@@ -21,6 +22,7 @@ type WkLayoutConfPartition struct {
 }
 
 type WkLayoutConf struct {
+	Path           string
 	Version        string
 	Name           string
 	Os             string
@@ -70,8 +72,14 @@ func NewWkImageLayout(layoutPath string) *WkImageLayout {
 }
 
 func (imglt *WkImageLayout) loadAndParse(schemaPath string) {
-	layoutConfigPath := path.Join(schemaPath, "layout.conf")
-	lcpf, err := os.Stat(layoutConfigPath)
+	var err error
+	imglt.conf = new(WkLayoutConf)
+	imglt.conf.Path, err = filepath.Abs(path.Join(schemaPath, "layout.conf"))
+	if err != nil {
+		panic(err)
+	}
+
+	lcpf, err := os.Stat(imglt.conf.Path)
 	if err != nil {
 		panic(err)
 	}
@@ -79,7 +87,7 @@ func (imglt *WkImageLayout) loadAndParse(schemaPath string) {
 		panic("Layout config cannot be a directory")
 	}
 
-	buff, err := ioutil.ReadFile(layoutConfigPath)
+	buff, err := ioutil.ReadFile(imglt.conf.Path)
 	if err != nil {
 		panic(err)
 	}
@@ -90,7 +98,6 @@ func (imglt *WkImageLayout) loadAndParse(schemaPath string) {
 		panic(err)
 	}
 
-	imglt.conf = new(WkLayoutConf)
 	imglt.setMainData(layoutBuff)
 	imglt.setPackageList(layoutBuff)
 	imglt.setPartitioningMap(layoutBuff)
