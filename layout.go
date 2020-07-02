@@ -21,13 +21,14 @@ type WkLayoutConfPartition struct {
 }
 
 type WkLayoutConf struct {
-	Version      string
-	Name         string
-	Os           string
-	Size         int64
-	Packages     []string
-	Partitions   []*WkLayoutConfPartition
-	Repositories []string
+	Version        string
+	Name           string
+	Os             string
+	Size           int64
+	PackageManager string
+	Packages       []string
+	Partitions     []*WkLayoutConfPartition
+	Repositories   []string
 }
 
 type WkImageLayout struct {
@@ -125,6 +126,13 @@ func (imglt *WkImageLayout) setMainData(buff map[string]interface{}) {
 		os.Exit(wzlib_utils.EX_GENERIC)
 	}
 	imglt.conf.Size = int64(imgSize.(int))
+
+	packman, ex := buff["package-manager"]
+	if !ex {
+		fmt.Fprintln(os.Stderr, "Error: unknown package manager")
+		os.Exit(wzlib_utils.EX_GENERIC)
+	}
+	imglt.conf.PackageManager = packman.(string)
 }
 
 // Read repositories
