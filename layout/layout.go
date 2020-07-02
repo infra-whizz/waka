@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	wzlib_utils "github.com/infra-whizz/wzlib/utils"
-
 	"gopkg.in/yaml.v2"
 )
 
@@ -17,8 +16,20 @@ type WkLayoutConfPartition struct {
 	Size          int64
 	Label         string
 	PartitionCode string
+	GUID          string
 	Mountpoint    string
 	Type          string
+	device        string
+}
+
+// SetDevice to which partition is mounted on. This is mount-time use.
+func (partition *WkLayoutConfPartition) SetDevice(device string) {
+	partition.device = device
+}
+
+// UnsetDevice to which partition is mounted on. This is umount-time use.
+func (partition *WkLayoutConfPartition) UnsetDevice() {
+	partition.device = ""
 }
 
 type WkLayoutConf struct {
@@ -35,7 +46,7 @@ type WkLayoutConf struct {
 
 type WkImageLayout struct {
 	conf                    *WkLayoutConf
-	partitionTypeCodes      map[string]string
+	partitionTypeCodes      map[string][]string
 	partitionFSTypeOverride map[string]string
 	partitionMountpoints    map[string]string
 }
@@ -54,15 +65,16 @@ func NewWkImageLayout(layoutPath string) *WkImageLayout {
 	imglt.partitionFSTypeOverride["linux_bios"] = "vfat"
 	imglt.partitionFSTypeOverride["linux_efi"] = "vfat"
 
-	imglt.partitionTypeCodes = make(map[string]string)
+	imglt.partitionTypeCodes = make(map[string][]string)
 	// Linux partitions support
-	imglt.partitionTypeCodes["linux_bios"] = "ef02"    // BIOS boot partition
-	imglt.partitionTypeCodes["linux_efi"] = "ef00"     // EFI system partition
-	imglt.partitionTypeCodes["linux_boot"] = "ea00"    // Freedesktop $BOOT
-	imglt.partitionTypeCodes["linux_swap"] = "8200"    // Linux swap
-	imglt.partitionTypeCodes["linux_root"] = "8300"    // Linux filesystem
-	imglt.partitionTypeCodes["linux_home"] = "8302"    // Linux /home
-	imglt.partitionTypeCodes["linux_dmcrypt"] = "8308" // Linux dm-crypt
+	imglt.partitionTypeCodes["linux_bios"] = []string{"ef02", "21686148-6449-6E6F-744E-656564454649"}    // BIOS boot partition
+	imglt.partitionTypeCodes["linux_efi"] = []string{"ef00", "C12A7328-F81F-11D2-BA4B-00A0C93EC93B"}     // EFI system partition
+	imglt.partitionTypeCodes["linux_boot"] = []string{"ea00", "BC13C2FF-59E6-4262-A352-B275FD6F7172"}    // Freedesktop $BOOT
+	imglt.partitionTypeCodes["linux_swap"] = []string{"8200", "0657FD6D-A4AB-43C4-84E5-0933C84B4F4F"}    // Linux swap
+	imglt.partitionTypeCodes["linux_root"] = []string{"8300", "0FC63DAF-8483-4772-8E79-3D69D8477DE4"}    // Linux filesystem
+	imglt.partitionTypeCodes["linux_data"] = []string{"8300", "0FC63DAF-8483-4772-8E79-3D69D8477DE4"}    // Linux filesystem data
+	imglt.partitionTypeCodes["linux_home"] = []string{"8302", "933AC7E1-2EB4-4F13-B844-0E14E2AEF915"}    // Linux /home
+	imglt.partitionTypeCodes["linux_dmcrypt"] = []string{"8308", "7FFEC5C9-2D00-49B7-8941-3EA10A5586B7"} // Linux dm-crypt
 
 	// Add your OS partitions below in format: <osname>_<type> :-)
 
@@ -168,13 +180,13 @@ func (imglt *WkImageLayout) setPackageList(buff map[string]interface{}) {
 	}
 }
 
-func (imglt *WkImageLayout) getPartitionTypeCode(ostype string, partname string) string {
+func (imglt *WkImageLayout) getPartitionTypeCode(ostype string, partname string) []string {
 	if partname == "data" {
 		partname = "root"
 	}
 	value, ex := imglt.partitionTypeCodes[fmt.Sprintf("%s_%s", ostype, partname)]
 	if !ex {
-		return ""
+		return []string{"", ""}
 	}
 	return value
 }
@@ -211,7 +223,7 @@ func (imglt *WkImageLayout) setPartitioningMap(buff map[string]interface{}) {
 	for _, partItf := range partmap.([]interface{}) {
 		for partType := range partItf.(map[interface{}]interface{}) {
 			partCode := imglt.getPartitionTypeCode(imglt.conf.Os, partType.(string))
-			if partCode == "" {
+			if partCode[0] == "" {
 				fmt.Fprintln(os.Stderr, "Error: unsupported partition type:", partType)
 				os.Exit(wzlib_utils.EX_GENERIC)
 			}
@@ -246,7 +258,8 @@ func (imglt *WkImageLayout) setPartitioningMap(buff map[string]interface{}) {
 
 			imglt.conf.Partitions = append(imglt.conf.Partitions,
 				&WkLayoutConfPartition{
-					PartitionCode: partCode,
+					PartitionCode: partCode[0],
+					GUID:          partCode[1],
 					Size:          int64(partSize.(int)),
 					Label:         partLabel.(string),
 					Type:          partFSType.(string),
