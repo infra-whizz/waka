@@ -265,3 +265,8 @@ func (imglt *WkImageLayout) verifyPartitionConfiguration() {
 		}
 	}
 }
+
+// GetConfig of the image layout
+func (imglt *WkImageLayout) GetConfig() *WkLayoutConf {
+	return imglt.conf
+}
