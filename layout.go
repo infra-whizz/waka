@@ -21,10 +21,13 @@ type WkLayoutConfPartition struct {
 }
 
 type WkLayoutConf struct {
-	Os         string
-	Size       int64
-	Packages   []string
-	Partitions []*WkLayoutConfPartition
+	Version      string
+	Name         string
+	Os           string
+	Size         int64
+	Packages     []string
+	Partitions   []*WkLayoutConfPartition
+	Repositories []string
 }
 
 type WkImageLayout struct {
@@ -90,11 +93,25 @@ func (imglt *WkImageLayout) loadAndParse(schemaPath string) {
 	imglt.setMainData(layoutBuff)
 	imglt.setPackageList(layoutBuff)
 	imglt.setPartitioningMap(layoutBuff)
+	imglt.setRepoList(layoutBuff)
 	imglt.verifyPartitionConfiguration()
 }
 
 // Set main data of the image
 func (imglt *WkImageLayout) setMainData(buff map[string]interface{}) {
+	name, ex := buff["name"]
+	if !ex || name.(string) == "" {
+		name = "untitled"
+	}
+	imglt.conf.Name = name.(string)
+
+	version, ex := buff["version"]
+	if !ex {
+		fmt.Fprintln(os.Stderr, "Error: Version is not specified.")
+		os.Exit(wzlib_utils.EX_GENERIC)
+	}
+	imglt.conf.Version = version.(string)
+
 	osdata, ex := buff["os"]
 	if !ex {
 		fmt.Fprintln(os.Stderr, "Error: OS is not defined in the configuration")
@@ -108,6 +125,19 @@ func (imglt *WkImageLayout) setMainData(buff map[string]interface{}) {
 		os.Exit(wzlib_utils.EX_GENERIC)
 	}
 	imglt.conf.Size = int64(imgSize.(int))
+}
+
+// Read repositories
+func (imglt *WkImageLayout) setRepoList(buff map[string]interface{}) {
+	imglt.conf.Repositories = make([]string, 0)
+	repolist, ex := buff["repositories"]
+	if !ex {
+		fmt.Fprintln(os.Stderr, "No repository URLs specified.")
+		os.Exit(wzlib_utils.EX_GENERIC)
+	}
+	for _, repoURL := range repolist.([]interface{}) {
+		imglt.conf.Repositories = append(imglt.conf.Repositories, repoURL.(string))
+	}
 }
 
 // Get package list to the configuration structure
