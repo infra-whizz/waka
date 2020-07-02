@@ -43,6 +43,16 @@ func (dm *WkDiskManager) SetTempDir(wdir string) *WkDiskManager {
 	return dm
 }
 
+// Remove disk
+func (dm *WkDiskManager) Remove() error {
+	diskPath := dm.getDiskPath()
+	nfo, _ := os.Stat(diskPath)
+	if nfo != nil {
+		return os.Remove(diskPath)
+	}
+	return nil
+}
+
 // Create disk, according to the layout.
 // Output goes to the same directory is where layout.conf as build/ subdir.
 func (dm *WkDiskManager) Create() error {

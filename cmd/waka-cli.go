@@ -16,7 +16,7 @@ func appDispatcher(ctx *cli.Context) error {
 		return fmt.Errorf("Error: Image schema path was not provided. Try --help, perhaps?\n")
 	}
 
-	waka.NewWaka().LoadSchema(ctx.String("schema")).Build()
+	waka.NewWaka().LoadSchema(ctx.String("schema")).Build(ctx.Bool("force"))
 
 	cli.ShowAppHelpAndExit(ctx, 0)
 	return nil
@@ -43,6 +43,12 @@ func main() {
 				Name:     "schema",
 				Aliases:  []string{"s"},
 				Usage:    "Path to the image schema",
+				Required: false,
+			},
+			&cli.BoolFlag{
+				Name:     "force",
+				Aliases:  []string{"f"},
+				Usage:    "Flush previous builds",
 				Required: false,
 			},
 		},

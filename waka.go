@@ -26,8 +26,11 @@ func (w *Waka) LoadSchema(schemaPath string) *Waka {
 }
 
 // Prepare environment, make disks, mount
-func (w *Waka) prepare() {
+func (w *Waka) prepare(force bool) {
 	disk := waka_diskman.NewWkDiskManager(w.imageLayout).SetTempDir(".")
+	if force {
+		disk.Remove()
+	}
 	if err := disk.Create(); err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err.Error())
 		os.Exit(wzlib_util.EX_GENERIC)
@@ -54,8 +57,8 @@ func (w *Waka) cleanup() {
 }
 
 // Build the image
-func (w *Waka) Build() {
-	w.prepare()
+func (w *Waka) Build(force bool) {
+	w.prepare(force)
 	w.partitioning()
 	w.bootstrap()
 	w.runCMS()
