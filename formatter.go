@@ -2,8 +2,6 @@ package waka
 
 import (
 	"fmt"
-
-	wzlib_subprocess "github.com/infra-whizz/wzlib/subprocess"
 )
 
 /*
@@ -82,10 +80,4 @@ func (fm *WakaDiskFormatter) cramfs() {
 }
 
 func (fm *WakaDiskFormatter) createRawImage() {
-	cmd, err := wzlib_subprocess.BufferedExec("dd", "if=/dev/zero", "of=shit.img", "bs=1M", "seek=500", "count=0")
-	if err != nil {
-		fmt.Println("Call init error:", err.Error())
-	}
-	fmt.Println(cmd.StdoutString())
-	cmd.Wait()
 }
