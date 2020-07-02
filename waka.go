@@ -12,6 +12,7 @@ import (
 
 type Waka struct {
 	imageLayout *waka_layout.WkImageLayout
+	diskman     *waka_diskman.WkDiskManager
 }
 
 func NewWaka() *Waka {
@@ -27,17 +28,21 @@ func (w *Waka) LoadSchema(schemaPath string) *Waka {
 
 // Prepare environment, make disks, mount
 func (w *Waka) prepare(force bool) {
-	disk := waka_diskman.NewWkDiskManager(w.imageLayout).SetTempDir(".")
+	w.diskman = waka_diskman.NewWkDiskManager(w.imageLayout).SetTempDir(".")
 	if force {
-		disk.Remove()
+		if err := w.diskman.Remove(); err != nil {
+			fmt.Fprintln(os.Stderr, "Error:", err.Error())
+			os.Exit(wzlib_util.EX_GENERIC)
+		}
 	}
-	if err := disk.Create(); err != nil {
+	if err := w.diskman.Create(); err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err.Error())
 		os.Exit(wzlib_util.EX_GENERIC)
 	}
 }
 
 func (w *Waka) partitioning() {
+	fmt.Println("Partitioning")
 	os.Exit(wzlib_util.EX_GENERIC)
 }
 
