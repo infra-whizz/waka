@@ -42,9 +42,41 @@ func (dm *WkDiskManager) cleanup() {
 
 func (dm *WkDiskManager) createTemporarySpace() error {
 	var err error
-	dm.tmpDir, err = ioutil.TempDir(dm.tmpRoot, "waka-build") // Config!
+	dm.tmpDir, err = ioutil.TempDir(dm.tmpRoot, "waka-build")
 	if err != nil {
 		return err
 	}
 	return nil
 }
+
+// Connect disk image to the loop
+func (dm *WkDiskManager) loopDiskImage() error {
+	if dm.parted == nil {
+		cmd, err := wzlib_subprocess.BufferedExec("losetup", "-fP", dm.getDiskPath())
+		if err != nil {
+			return err
+		}
+		out := cmd.StdoutString()
+		fmt.Println(out)
+		return cmd.Wait()
+	}
+	return nil
+}
+
+// Disconnect disk image from the loop
+func (dm *WkDiskManager) unLoopDiskImage() error {
+	if dm.parted != nil {
+		cmd, err := wzlib_subprocess.BufferedExec("losetup", "-d", dm.parted.GetDiskDevice())
+		if err != nil {
+			return err
+		}
+		out := cmd.StdoutString()
+		if err := cmd.Wait(); err != nil {
+			return err
+		}
+		fmt.Println("DEBUG:", out)
+		dm.parted = nil
+	}
+	return nil
+}
+

@@ -1,6 +1,11 @@
-package waka
+package waka_parted
+
+import (
+	waka_layout "github.com/infra-whizz/waka/layout"
+)
 
 type WakaPartitioner interface {
 	Flush()
-	Create(name string, mbsize int, typeName string)
+	Create(partition *waka_layout.WkLayoutConfPartition)
+	GetDiskDevice() string
 }

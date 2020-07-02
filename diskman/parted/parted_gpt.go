@@ -74,4 +74,8 @@ func (gpt *WakaPartitionerGPT) Create(name string, mbsize int, typeName string) 
 		panic(err)
 	}
 	fmt.Println(cmd.StdoutString())
+
+// GetDiskDevice name
+func (gpt *WakaPartitionerGPT) GetDiskDevice() string {
+	return gpt.device
 }

@@ -70,6 +70,25 @@ func (dm *WkDiskManager) Create() error {
 	return dm.createRawDisk()
 }
 
+// Loop created image
+func (dm *WkDiskManager) Loop() error {
+	if err := dm.loopDiskImage(); err != nil {
+		return err
+	}
+	diskDevice, err := dm.getDiskImageDevice()
+	if err != nil {
+		return err
+	}
+	dm.parted = waka_parted.NewWakaPartitionerGPT(dm.imglt.GetConfig().Os, diskDevice)
+	fmt.Println("DEBUG: Mounted as", dm.parted.GetDiskDevice())
+	return nil
+}
+
+// LoopOff turns looped image off
+func (dm *WkDiskManager) LoopOff() error {
+	return dm.unLoopDiskImage()
+}
+
 func (dm *WkDiskManager) Mount() {
 	dm.createTemporarySpace()
 }
