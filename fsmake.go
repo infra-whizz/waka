@@ -14,27 +14,27 @@ import (
 	Design of this class is subject to change in a future.
 */
 
-type WakaFSMake struct {
+type WakaDiskFormatter struct {
 	sizeMb      int64
 	rawFilename string
 }
 
-func NewWakaFSMake() *WakaFSMake {
-	fm := new(WakaFSMake)
+func NewWakaDiskFormatter() *WakaDiskFormatter {
+	fm := new(WakaDiskFormatter)
 	return fm
 }
 
-func (fm *WakaFSMake) SetSizeMb(size int64) *WakaFSMake {
+func (fm *WakaDiskFormatter) SetSizeMb(size int64) *WakaDiskFormatter {
 	fm.sizeMb = size
 	return fm
 }
 
-func (fm *WakaFSMake) SetOutputFile(fname string) *WakaFSMake {
+func (fm *WakaDiskFormatter) SetOutputFile(fname string) *WakaDiskFormatter {
 	fm.rawFilename = fname
 	return fm
 }
 
-func (fm *WakaFSMake) Format(fstype string) error {
+func (fm *WakaDiskFormatter) Format(fstype string) error {
 	if fm.sizeMb == 0 {
 		return fmt.Errorf("Unable to format image with %s to a zero size", fstype)
 	}
@@ -56,30 +56,36 @@ func (fm *WakaFSMake) Format(fstype string) error {
 }
 
 // Format image with ext2 FS
-func (fm *WakaFSMake) ext2() {
+func (fm *WakaDiskFormatter) ext2() {
 	fm.createRawImage()
 }
 
 // Format image with ext3 FS
-func (fm *WakaFSMake) ext3() {
+func (fm *WakaDiskFormatter) ext3() {
 	fm.createRawImage()
 }
 
 // Format image with ext4 FS
-func (fm *WakaFSMake) ext4() {
+func (fm *WakaDiskFormatter) ext4() {
 	fmt.Println("Formatting raw image with ext4")
 	fm.createRawImage()
 }
 
 // Format image with xfs FS
-func (fm *WakaFSMake) xfs() {
+func (fm *WakaDiskFormatter) xfs() {
 	fm.createRawImage()
 }
 
 // Format image with cramfs FS
-func (fm *WakaFSMake) cramfs() {
+func (fm *WakaDiskFormatter) cramfs() {
 	fm.createRawImage()
 }
 
-func (fm *WakaFSMake) createRawImage() {
+func (fm *WakaDiskFormatter) createRawImage() {
+	cmd, err := wzlib_subprocess.BufferedExec("dd", "if=/dev/zero", "of=shit.img", "bs=1M", "seek=500", "count=0")
+	if err != nil {
+		fmt.Println("Call init error:", err.Error())
+	}
+	fmt.Println(cmd.StdoutString())
+	cmd.Wait()
 }
