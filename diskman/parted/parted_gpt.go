@@ -53,7 +53,7 @@ func (gpt *WakaPartitionerGPT) getTypeName(name string) (string, error) {
 }
 
 // Create a next available partition
-func (gpt *WakaPartitionerGPT) Create(partition *waka_layout.WkLayoutConfPartition) {
+func (gpt *WakaPartitionerGPT) Create(partition *waka_layout.WkLayoutConfPartition) error {
 	fmt.Printf("Creating partition \"%s\" with size %d Mb\n", partition.Label, partition.Size)
 
 	var psize string
@@ -68,11 +68,15 @@ func (gpt *WakaPartitionerGPT) Create(partition *waka_layout.WkLayoutConfPartiti
 		"-t", fmt.Sprintf("0:%s", partition.PartitionCode),
 		"-c", fmt.Sprintf("0:\"%s\"", partition.Label))
 	if err != nil {
-		panic(err)
+		return err
 	}
 	out := cmd.StdoutString()
 	fmt.Println("DEBUG:", out)
-	cmd.Wait()
+	if err := cmd.Wait(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // GetDiskDevice name

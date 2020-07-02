@@ -6,6 +6,6 @@ import (
 
 type WakaPartitioner interface {
 	Flush()
-	Create(partition *waka_layout.WkLayoutConfPartition)
+	Create(partition *waka_layout.WkLayoutConfPartition) error
 	GetDiskDevice() string
 }
