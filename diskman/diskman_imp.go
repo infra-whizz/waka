@@ -1,6 +1,7 @@
 package waka_diskman
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"path"
@@ -31,7 +32,8 @@ func (dm *WkDiskManager) createRawDisk() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("DEBUG:", cmd.StdoutString())
+	out := cmd.StderrString()
+	fmt.Println("DEBUG:", out)
 
 	return cmd.Wait()
 }
@@ -80,3 +82,29 @@ func (dm *WkDiskManager) unLoopDiskImage() error {
 	return nil
 }
 
+func (dm *WkDiskManager) getDiskImageDevice() (string, error) {
+	cmd, err := wzlib_subprocess.BufferedExec("losetup", "-lJ")
+	if err != nil {
+		return "", err
+	}
+	var buff map[string][]map[string]interface{}
+	if err := json.Unmarshal([]byte(cmd.StdoutString()), &buff); err != nil {
+		return "", err
+	}
+
+	if err := cmd.Wait(); err != nil {
+		return "", err
+	}
+
+	for _, deviceLoopMap := range buff["loopdevices"] {
+		if deviceLoopMap["back-file"].(string) == dm.getDiskPath() {
+			return deviceLoopMap["name"].(string), nil
+		}
+	}
+
+	return "", fmt.Errorf("No device found for %s disk", dm.getDiskName())
+}
+
+func (dm *WkDiskManager) addPartition(partition *waka_layout.WkLayoutConfPartition) {
+	dm.parted.Create(partition)
+}

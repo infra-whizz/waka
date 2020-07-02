@@ -1,8 +1,9 @@
-package waka
+package waka_parted
 
 import (
 	"fmt"
 
+	waka_layout "github.com/infra-whizz/waka/layout"
 	wzlib_subprocess "github.com/infra-whizz/wzlib/subprocess"
 )
 
@@ -52,28 +53,27 @@ func (gpt *WakaPartitionerGPT) getTypeName(name string) (string, error) {
 }
 
 // Create a next available partition
-func (gpt *WakaPartitionerGPT) Create(name string, mbsize int, typeName string) {
-	fmt.Printf("Creating %s partition \"%s\" with size %d Mb\n", typeName, name, mbsize)
-	partCode, err := gpt.getTypeName(typeName)
-	if err != nil {
-		panic(err)
-	}
+func (gpt *WakaPartitionerGPT) Create(partition *waka_layout.WkLayoutConfPartition) {
+	fmt.Printf("Creating partition \"%s\" with size %d Mb\n", partition.Label, partition.Size)
 
 	var psize string
-	if mbsize == 0 {
+	if partition.Size == 0 {
 		psize = "0" // The rest of the space
 	} else {
-		psize = fmt.Sprintf("+%dM", mbsize)
+		psize = fmt.Sprintf("+%dM", partition.Size)
 	}
 
-	layout := fmt.Sprintf("0:0:%s", psize)
-	partition := fmt.Sprintf("0:%s", partCode)
-	label := fmt.Sprintf("0:\"%s\"", name)
-	cmd, err := wzlib_subprocess.BufferedExec(gpt.parted, "-n", layout, "-t", partition, "-c", label)
+	cmd, err := wzlib_subprocess.BufferedExec(gpt.parted, gpt.device,
+		"-n", fmt.Sprintf("0:0:%s", psize),
+		"-t", fmt.Sprintf("0:%s", partition.PartitionCode),
+		"-c", fmt.Sprintf("0:\"%s\"", partition.Label))
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(cmd.StdoutString())
+	out := cmd.StdoutString()
+	fmt.Println("DEBUG:", out)
+	cmd.Wait()
+}
 
 // GetDiskDevice name
 func (gpt *WakaPartitionerGPT) GetDiskDevice() string {

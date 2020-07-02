@@ -39,26 +39,34 @@ func (w *Waka) prepare(force bool) {
 		fmt.Fprintln(os.Stderr, "Error:", err.Error())
 		os.Exit(wzlib_util.EX_GENERIC)
 	}
+	if err := w.diskman.Loop(); err != nil {
+		fmt.Fprintln(os.Stderr, "Error:", err.Error())
+		os.Exit(wzlib_util.EX_GENERIC)
+	}
 }
 
 func (w *Waka) partitioning() {
 	fmt.Println("Partitioning")
-	os.Exit(wzlib_util.EX_GENERIC)
+	if err := w.diskman.MakePartitions(); err != nil {
+		fmt.Fprintln(os.Stderr, "Partitioning Error:", err.Error())
+		os.Exit(wzlib_util.EX_GENERIC)
+	}
 }
 
 // Bootstrap basic components, setup CMS system
 func (w *Waka) bootstrap() {
-	os.Exit(wzlib_util.EX_GENERIC)
 }
 
 // RunCMS on prepared image mount
 func (w *Waka) runCMS() {
-	os.Exit(wzlib_util.EX_GENERIC)
 }
 
 // Cleanup image, devices, data etc
 func (w *Waka) cleanup() {
-	os.Exit(wzlib_util.EX_GENERIC)
+	if err := w.diskman.LoopOff(); err != nil {
+		fmt.Fprintln(os.Stderr, "Removing loop device error:", err.Error())
+		os.Exit(wzlib_util.EX_GENERIC)
+	}
 }
 
 // Build the image

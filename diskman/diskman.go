@@ -5,6 +5,8 @@ import (
 	"os"
 	"path"
 
+	waka_parted "github.com/infra-whizz/waka/diskman/parted"
+
 	waka_layout "github.com/infra-whizz/waka/layout"
 )
 
@@ -22,6 +24,7 @@ import (
 // WkDiskManager object
 type WkDiskManager struct {
 	imglt   *waka_layout.WkImageLayout
+	parted  waka_parted.WakaPartitioner
 	tmpRoot string
 	tmpDir  string
 }
@@ -49,6 +52,15 @@ func (dm *WkDiskManager) Remove() error {
 	nfo, _ := os.Stat(diskPath)
 	if nfo != nil {
 		return os.Remove(diskPath)
+	}
+	return nil
+}
+
+// MakePartitions on the disk
+func (dm *WkDiskManager) MakePartitions() error {
+	for partId, partMeta := range dm.getDiskLayoutConfig().Partitions {
+		partId++
+		dm.addPartition(partMeta)
 	}
 	return nil
 }
