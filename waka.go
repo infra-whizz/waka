@@ -1,7 +1,10 @@
 package waka
 
 import (
+	"fmt"
 	"os"
+
+	waka_diskman "github.com/infra-whizz/waka/diskman"
 
 	waka_layout "github.com/infra-whizz/waka/layout"
 	wzlib_util "github.com/infra-whizz/wzlib/utils"
@@ -24,15 +27,11 @@ func (w *Waka) LoadSchema(schemaPath string) *Waka {
 
 // Prepare environment, make disks, mount
 func (w *Waka) prepare() {
-	//disk := NewWkDiskManager(w.imageLayout)
-
-	/*
-		err := NewWakaFSMake().SetSizeMb(w.imageLayout.conf.Size)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-	*/
-	os.Exit(wzlib_util.EX_GENERIC)
+	disk := waka_diskman.NewWkDiskManager(w.imageLayout).SetTempDir(".")
+	if err := disk.Create(); err != nil {
+		fmt.Fprintln(os.Stderr, "Error:", err.Error())
+		os.Exit(wzlib_util.EX_GENERIC)
+	}
 }
 
 func (w *Waka) partitioning() {

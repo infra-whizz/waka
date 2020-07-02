@@ -24,15 +24,16 @@ func (dm *WkDiskManager) getDiskPath() string {
 	return path.Join(path.Dir(dm.getDiskLayoutConfig().Path), "build", dm.getDiskName())
 }
 
-func (dm *WkDiskManager) createRawDisk() {
+func (dm *WkDiskManager) createRawDisk() error {
 	cmd, err := wzlib_subprocess.BufferedExec("dd", "if=/dev/zero",
 		fmt.Sprintf("of=%s", dm.getDiskPath()), "bs=1024K",
 		fmt.Sprintf("seek=%d", dm.getDiskLayoutConfig().Size), "count=0")
 	if err != nil {
-		fmt.Println("Call init error:", err.Error())
+		return err
 	}
-	fmt.Println(cmd.StdoutString())
-	cmd.Wait()
+	fmt.Println("DEBUG:", cmd.StdoutString())
+
+	return cmd.Wait()
 }
 
 func (dm *WkDiskManager) cleanup() {

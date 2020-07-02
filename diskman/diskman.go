@@ -6,7 +6,6 @@ import (
 	"path"
 
 	waka_layout "github.com/infra-whizz/waka/layout"
-	wzlib_utils "github.com/infra-whizz/wzlib/utils"
 )
 
 /*
@@ -46,21 +45,19 @@ func (dm *WkDiskManager) SetTempDir(wdir string) *WkDiskManager {
 
 // Create disk, according to the layout.
 // Output goes to the same directory is where layout.conf as build/ subdir.
-func (dm *WkDiskManager) Create() {
+func (dm *WkDiskManager) Create() error {
 	diskPath := dm.getDiskPath()
 	nfo, _ := os.Stat(diskPath)
 	if nfo != nil {
-		fmt.Fprintf(os.Stderr, "Error: file %s exist\n", nfo.Name())
-		os.Exit(wzlib_utils.EX_GENERIC)
+		return fmt.Errorf("File %s already exists", nfo.Name())
 	}
 
 	fmt.Println("Creating image", dm.getDiskName())
 	if err := os.MkdirAll(path.Dir(diskPath), 0755); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: unable to create disk path %s: %s\n", path.Dir(diskPath), err.Error())
-		os.Exit(wzlib_utils.EX_GENERIC)
+		return fmt.Errorf("Unable to create disk path %s: %s", path.Dir(diskPath), err.Error())
 	}
 
-	dm.createRawDisk()
+	return dm.createRawDisk()
 }
 
 func (dm *WkDiskManager) Mount() {
