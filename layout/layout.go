@@ -32,6 +32,11 @@ func (partition *WkLayoutConfPartition) UnsetDevice() {
 	partition.device = ""
 }
 
+// GetDevice of the partition
+func (partition *WkLayoutConfPartition) GetDevice() string {
+	return partition.device
+}
+
 type WkLayoutConf struct {
 	Path           string
 	Version        string

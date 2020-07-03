@@ -98,7 +98,13 @@ func (dm *WkDiskManager) Loop() error {
 	}
 	dm.parted = waka_parted.NewWakaPartitionerGPT(diskDevice)
 	if err := dm.updateMountedDeviceMap(); err != nil {
+		// No partition table
 		fmt.Println("ERROR update mounted device map:", err.Error())
+	} else {
+		// Mount everything
+		for _, partition := range dm.imglt.GetConfig().Partitions {
+			fmt.Println("Mounted partition", partition.GetDevice())
+		}
 	}
 	fmt.Println("DEBUG: Mounted as", dm.parted.GetDiskDevice())
 	return nil
@@ -126,4 +132,10 @@ func (dm *WkDiskManager) GetPartitionMountpoint(partname string) string {
 func (dm *WkDiskManager) Umount() {
 	dm.flushDeviceMap()
 	dm.cleanup()
+}
+
+// GetDiskImageDevice corresponding to the mounted disk loop
+func (dm *WkDiskManager) GetDiskImageDevice() string {
+	dev, _ := dm.getDiskImageDevice()
+	return dev
 }
