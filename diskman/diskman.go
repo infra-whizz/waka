@@ -97,7 +97,7 @@ func (dm *WkDiskManager) Loop() error {
 	if err != nil {
 		return err
 	}
-	dm.parted = waka_parted.NewWakaPartitionerGPT(dm.imglt.GetConfig().Os, diskDevice)
+	dm.parted = waka_parted.NewWakaPartitionerGPT(diskDevice)
 	if err := dm.updateMountedDeviceMap(); err != nil {
 		fmt.Println("ERROR update mounted device map:", err.Error())
 	}
