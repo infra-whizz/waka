@@ -18,7 +18,7 @@ func (w *Waka) prepare(force bool) {
 
 func (w *Waka) partitioning() {
 	fmt.Println("Partitioning")
-	ExitOnErrorPreamble(w.diskman.MakePartitions(), "Partitioning failed")
+	ExitOnErrorPreamble(w.diskman.MakePartitions(), "Partitioning did not suceeded -")
 }
 
 // Remount all partitions that has been just created
