@@ -109,8 +109,8 @@ func (dm *WkDiskManager) LoopOff() error {
 	return dm.unLoopDiskImage()
 }
 
-func (dm *WkDiskManager) Mount() {
-	dm.createTemporarySpace()
+func (dm *WkDiskManager) Mount() error {
+	return dm.createTemporarySpace()
 }
 
 // Bind system (/proc, /dev, /sys etc)
