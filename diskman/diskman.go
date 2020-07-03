@@ -58,8 +58,7 @@ func (dm *WkDiskManager) Remove() error {
 
 // MakePartitions on the disk
 func (dm *WkDiskManager) MakePartitions() error {
-	for partId, partMeta := range dm.getDiskLayoutConfig().Partitions {
-		partId++
+	for _, partMeta := range dm.getDiskLayoutConfig().Partitions {
 		if err := dm.addPartition(partMeta); err != nil {
 			return err
 		}
