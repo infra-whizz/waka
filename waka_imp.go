@@ -29,7 +29,7 @@ func (w *Waka) remount() {
 
 // Format all partitions of the current device
 func (w *Waka) format() {
-
+	ExitOnErrorPreamble(w.diskman.FormatAllPartitions(), "Formatting failure -")
 }
 
 // Bootstrap basic components, setup CMS system

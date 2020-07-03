@@ -70,6 +70,19 @@ func (dm *WkDiskManager) MakePartitions() error {
 	return nil
 }
 
+// FormatAllPartitions that are present in the disk device, according to the configured layout.
+func (dm *WkDiskManager) FormatAllPartitions() error {
+	for _, partition := range dm.imglt.GetConfig().Partitions {
+		if err := dm.formatPartition(partition); err != nil {
+			fmt.Println("FAILED:", err.Error())
+			return err
+		} else {
+			fmt.Println("FORMATTED")
+		}
+	}
+	return nil
+}
+
 // Create disk, according to the layout.
 // Output goes to the same directory is where layout.conf as build/ subdir.
 func (dm *WkDiskManager) Create() error {

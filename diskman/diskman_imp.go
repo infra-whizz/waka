@@ -139,3 +139,35 @@ func (dm *WkDiskManager) flushDeviceMap() {
 		partition.UnsetDevice()
 	}
 }
+
+// Format given partition
+func (dm *WkDiskManager) formatPartition(partition *waka_layout.WkLayoutConfPartition) error {
+	fmt.Println("Formatting partition:", partition.Label, "available at", partition.GetDevice(), "as", partition.Type)
+	var args []string
+	switch partition.Type {
+	case "vfat":
+		args = []string{"-t", partition.Type, "-F", "32", partition.GetDevice()}
+	case "ext2", "ext3", "ext4", "xfs":
+		// XFS support is minimal default at the moment
+		args = []string{"-t", partition.Type, "-L", partition.Label, partition.GetDevice()}
+	default:
+		return fmt.Errorf("Unsupported filesystem: %s", partition.Type)
+	}
+
+	cmd, err := wzlib_subprocess.BufferedExec("mkfs", args...)
+	out := cmd.StdoutString()
+	sterr := cmd.StderrString()
+
+	if err != nil {
+		fmt.Println("DEBUG ERROR:", sterr)
+		return err
+	}
+
+	if err := cmd.Wait(); err != nil {
+		fmt.Println("DEBUG ERROR:", sterr)
+		return err
+	}
+
+	fmt.Println("DEBUG:", out)
+	return nil
+}
