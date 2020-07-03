@@ -22,8 +22,7 @@ func (w *Waka) partitioning() {
 }
 
 // Remount all partitions that has been just created
-func (w *Waka) remount() {
-	w.cleanup()
+func (w *Waka) mount() {
 	ExitOnErrorPreamble(w.diskman.Loop(), "Remount failed -")
 }
 
@@ -42,6 +41,8 @@ func (w *Waka) runCMS() {
 
 // Cleanup image, devices, data etc
 func (w *Waka) cleanup() {
+	ExitOnErrorPreamble(w.diskman.Umount(), "Unable to umount devices")
 	ExitOnErrorPreamble(w.diskman.LoopOff(),
 		fmt.Sprintf("Umount loop device %s failed -", w.diskman.GetDiskImageDevice()))
+	ExitOnErrorPreamble(w.diskman.Cleanup(), "Unable to cleanup mountpoints")
 }

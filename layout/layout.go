@@ -19,7 +19,9 @@ type WkLayoutConfPartition struct {
 	GUID          string
 	Mountpoint    string
 	Type          string
-	device        string
+
+	device  string
+	mounted string
 }
 
 // SetDevice to which partition is mounted on. This is mount-time use.
@@ -35,6 +37,21 @@ func (partition *WkLayoutConfPartition) UnsetDevice() {
 // GetDevice of the partition
 func (partition *WkLayoutConfPartition) GetDevice() string {
 	return partition.device
+}
+
+// SetMountpoint to the partition
+func (partition *WkLayoutConfPartition) SetMountpoint(mpt string) {
+	partition.mounted = mpt
+}
+
+// RemoveMountpoint of the partition
+func (partition *WkLayoutConfPartition) RemoveMountpoint() {
+	partition.mounted = ""
+}
+
+// GetMountedAs location on the current layout
+func (partition *WkLayoutConfPartition) GetMountedAs() string {
+	return partition.mounted
 }
 
 type WkLayoutConf struct {

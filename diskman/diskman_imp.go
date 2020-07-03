@@ -3,7 +3,7 @@ package waka_diskman
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path"
 
 	waka_layout "github.com/infra-whizz/waka/layout"
@@ -36,19 +36,6 @@ func (dm *WkDiskManager) createRawDisk() error {
 	fmt.Println("DEBUG:", out)
 
 	return cmd.Wait()
-}
-
-func (dm *WkDiskManager) cleanup() {
-	dm.tmpDir = ""
-}
-
-func (dm *WkDiskManager) createTemporarySpace() error {
-	var err error
-	dm.tmpDir, err = ioutil.TempDir(dm.tmpRoot, "waka-build")
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 // Connect disk image to the loop
@@ -138,6 +125,59 @@ func (dm *WkDiskManager) flushDeviceMap() {
 	for _, partition := range dm.imglt.GetConfig().Partitions {
 		partition.UnsetDevice()
 	}
+}
+
+// Mount partition
+func (dm *WkDiskManager) mountPartition(partition *waka_layout.WkLayoutConfPartition) error {
+	return dm._partitionMounter(partition, true)
+}
+
+// Umount partition
+func (dm *WkDiskManager) umountPartition(partition *waka_layout.WkLayoutConfPartition) error {
+	return dm._partitionMounter(partition, false)
+}
+
+// Partition mounter
+func (dm *WkDiskManager) _partitionMounter(partition *waka_layout.WkLayoutConfPartition, mount bool) error {
+	if dm.tmpDir == "" {
+		return fmt.Errorf("Temp directory is not defined")
+	}
+	mountpoint := path.Join(dm.tmpDir, path.Base(partition.GetDevice()))
+
+	var cmd *wzlib_subprocess.BufferedCmd
+	var err error
+	if mount {
+		fmt.Println("Mounting partition", partition.GetDevice(), "to", mountpoint)
+		if err := os.Mkdir(mountpoint, 0700); err != nil {
+			return err
+		}
+		cmd, err = wzlib_subprocess.BufferedExec("mount", partition.GetDevice(), mountpoint)
+	} else {
+		fmt.Println("Umounting partition", partition.GetDevice(), "from", mountpoint)
+		cmd, err = wzlib_subprocess.BufferedExec("umount", partition.GetDevice())
+	}
+	sout := cmd.StdoutString()
+	serr := cmd.StderrString()
+
+	if err != nil {
+		fmt.Println("DEBUG ERROR:", serr)
+		return err
+	}
+
+	err = cmd.Wait()
+	if err != nil {
+		fmt.Println("DEBUG ERROR:", serr)
+		return err
+	}
+	fmt.Println("DEBUG:", sout)
+
+	if mount {
+		partition.SetMountpoint(mountpoint)
+	} else {
+		partition.RemoveMountpoint()
+	}
+
+	return nil
 }
 
 // Format given partition

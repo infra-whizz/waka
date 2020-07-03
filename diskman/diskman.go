@@ -2,6 +2,7 @@ package waka_diskman
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
 
@@ -34,6 +35,11 @@ func NewWkDiskManager(imglt *waka_layout.WkImageLayout) *WkDiskManager {
 	dm := new(WkDiskManager)
 	dm.imglt = imglt
 	dm.tmpRoot = "/tmp"
+	var err error
+	dm.tmpDir, err = ioutil.TempDir(dm.tmpRoot, "waka-build")
+	if err != nil {
+		panic(err)
+	}
 
 	return dm
 }
@@ -116,7 +122,9 @@ func (dm *WkDiskManager) Loop() error {
 	} else {
 		// Mount everything
 		for _, partition := range dm.imglt.GetConfig().Partitions {
-			fmt.Println("Mounted partition", partition.GetDevice())
+			if err := dm.mountPartition(partition); err != nil {
+				return err
+			}
 		}
 	}
 	fmt.Println("DEBUG: Mounted as", dm.parted.GetDiskDevice())
@@ -129,7 +137,7 @@ func (dm *WkDiskManager) LoopOff() error {
 }
 
 func (dm *WkDiskManager) Mount() error {
-	return dm.createTemporarySpace()
+	return nil
 }
 
 // Bind system (/proc, /dev, /sys etc)
@@ -142,9 +150,22 @@ func (dm *WkDiskManager) GetPartitionMountpoint(partname string) string {
 }
 
 // Umount disks (all)
-func (dm *WkDiskManager) Umount() {
+func (dm *WkDiskManager) Umount() error {
+	for _, partition := range dm.imglt.GetConfig().Partitions {
+		dm.umountPartition(partition)
+	}
 	dm.flushDeviceMap()
-	dm.cleanup()
+	return nil
+}
+
+// Cleanup the mountpoints
+func (dm *WkDiskManager) Cleanup() error {
+	fmt.Println("Cleaning up")
+	if err := os.RemoveAll(dm.tmpDir); err != nil {
+		return err
+	}
+	dm.tmpDir = ""
+	return nil
 }
 
 // GetDiskImageDevice corresponding to the mounted disk loop
