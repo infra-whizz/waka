@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"sort"
 
 	waka_layout "github.com/infra-whizz/waka/layout"
 	wzlib_subprocess "github.com/infra-whizz/wzlib/subprocess"
@@ -142,14 +143,14 @@ func (dm *WkDiskManager) _partitionMounter(partition *waka_layout.WkLayoutConfPa
 	if dm.tmpDir == "" {
 		return fmt.Errorf("Temp directory is not defined")
 	}
-	mountpoint := path.Join(dm.tmpDir, path.Base(partition.GetDevice()))
+	mountpoint := path.Join(dm.tmpDir, partition.Mountpoint)
 
 	var cmd *wzlib_subprocess.BufferedCmd
 	var err error
 	if mount {
 		fmt.Println("Mounting partition", partition.GetDevice(), "to", mountpoint)
-		if err := os.Mkdir(mountpoint, 0700); err != nil {
-			return err
+		if err := os.MkdirAll(mountpoint, 0700); err != nil {
+			fmt.Println("ERROR creating directory:", err.Error())
 		}
 		cmd, err = wzlib_subprocess.BufferedExec("mount", partition.GetDevice(), mountpoint)
 	} else {
@@ -182,16 +183,16 @@ func (dm *WkDiskManager) _partitionMounter(partition *waka_layout.WkLayoutConfPa
 
 // Format given partition
 func (dm *WkDiskManager) formatPartition(partition *waka_layout.WkLayoutConfPartition) error {
-	fmt.Println("Formatting partition:", partition.Label, "available at", partition.GetDevice(), "as", partition.Type)
+	fmt.Println("Formatting partition:", partition.Label, "available at", partition.GetDevice(), "as", partition.FsType)
 	var args []string
-	switch partition.Type {
+	switch partition.FsType {
 	case "vfat":
-		args = []string{"-t", partition.Type, "-F", "32", partition.GetDevice()}
+		args = []string{"-t", partition.FsType, "-F", "32", partition.GetDevice()}
 	case "ext2", "ext3", "ext4", "xfs":
 		// XFS support is minimal default at the moment
-		args = []string{"-t", partition.Type, "-L", partition.Label, partition.GetDevice()}
+		args = []string{"-t", partition.FsType, "-L", partition.Label, partition.GetDevice()}
 	default:
-		return fmt.Errorf("Unsupported filesystem: %s", partition.Type)
+		return fmt.Errorf("Unsupported filesystem: %s", partition.FsType)
 	}
 
 	cmd, err := wzlib_subprocess.BufferedExec("mkfs", args...)
@@ -210,4 +211,18 @@ func (dm *WkDiskManager) formatPartition(partition *waka_layout.WkLayoutConfPart
 
 	fmt.Println("DEBUG:", out)
 	return nil
+}
+
+// Get mount points
+func (dm *WkDiskManager) getOrderedMountPoints(reversed bool) []string {
+	mountPoints := make([]string, 0)
+	for _, partition := range dm.imglt.GetConfig().Partitions {
+		mountPoints = append(mountPoints, partition.Mountpoint)
+	}
+	if reversed {
+		sort.Sort(sort.Reverse(sort.StringSlice(mountPoints)))
+	} else {
+		sort.Strings(mountPoints)
+	}
+	return mountPoints
 }

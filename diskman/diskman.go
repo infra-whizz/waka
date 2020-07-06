@@ -120,10 +120,21 @@ func (dm *WkDiskManager) Loop() error {
 		// No partition table
 		fmt.Println("ERROR update mounted device map:", err.Error())
 	} else {
-		// Mount everything
+		// Get root partition first
 		for _, partition := range dm.imglt.GetConfig().Partitions {
-			if err := dm.mountPartition(partition); err != nil {
-				return err
+			if partition.PType == "root" {
+				if err := dm.mountPartition(partition); err != nil {
+					return err
+				}
+			}
+		}
+		// Mount the rest
+		for _, mountPoint := range dm.getOrderedMountPoints(false) {
+			partition := dm.imglt.GetPartitionByMountpoint(mountPoint)
+			if partition.PType != "root" {
+				if err := dm.mountPartition(partition); err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -146,13 +157,20 @@ func (dm *WkDiskManager) Bind() {
 
 // GetPartitionMountpoint where particular partition is mounted from the current image.
 func (dm *WkDiskManager) GetPartitionMountpoint(partname string) string {
+	for _, partition := range dm.imglt.GetConfig().Partitions {
+		if partition.PType == partname {
+			return path.Join(dm.tmpDir, partition.Mountpoint)
+		}
+	}
 	return ""
 }
 
 // Umount disks (all)
 func (dm *WkDiskManager) Umount() error {
-	for _, partition := range dm.imglt.GetConfig().Partitions {
-		dm.umountPartition(partition)
+	for _, partitionMountpoint := range dm.getOrderedMountPoints(true) {
+		if err := dm.umountPartition(dm.imglt.GetPartitionByMountpoint(partitionMountpoint)); err != nil {
+			return err
+		}
 	}
 	dm.flushDeviceMap()
 	return nil
