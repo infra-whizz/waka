@@ -18,7 +18,8 @@ type WkLayoutConfPartition struct {
 	PartitionCode string
 	GUID          string
 	Mountpoint    string
-	Type          string
+	FsType        string // file system type (formatting)
+	PType         string // partition type (label in config)
 
 	device  string
 	mounted string
@@ -71,10 +72,16 @@ type WkImageLayout struct {
 	partitionTypeCodes      map[string][]string
 	partitionFSTypeOverride map[string]string
 	partitionMountpoints    map[string]string
+
+	idxPartitionsByMountpoint map[string]*WkLayoutConfPartition
+	idxPartitionsByPType      map[string]*WkLayoutConfPartition
 }
 
 func NewWkImageLayout(layoutPath string) *WkImageLayout {
 	imglt := new(WkImageLayout)
+
+	imglt.idxPartitionsByMountpoint = make(map[string]*WkLayoutConfPartition)
+	imglt.idxPartitionsByPType = make(map[string]*WkLayoutConfPartition)
 
 	imglt.partitionMountpoints = make(map[string]string)
 	imglt.partitionMountpoints["linux_bios"] = ""
@@ -278,15 +285,18 @@ func (imglt *WkImageLayout) setPartitioningMap(buff map[string]interface{}) {
 				partLabel = fmt.Sprintf("Partition %s", partType)
 			}
 
-			imglt.conf.Partitions = append(imglt.conf.Partitions,
-				&WkLayoutConfPartition{
-					PartitionCode: partCode[0],
-					GUID:          partCode[1],
-					Size:          int64(partSize.(int)),
-					Label:         partLabel.(string),
-					Type:          partFSType.(string),
-					Mountpoint:    partMountpoint.(string),
-				})
+			partition := &WkLayoutConfPartition{
+				PartitionCode: partCode[0],
+				GUID:          partCode[1],
+				Size:          int64(partSize.(int)),
+				Label:         partLabel.(string),
+				FsType:        partFSType.(string),
+				PType:         partType.(string),
+				Mountpoint:    partMountpoint.(string),
+			}
+			imglt.conf.Partitions = append(imglt.conf.Partitions, partition)
+			imglt.idxPartitionsByMountpoint[partition.Mountpoint] = partition
+			imglt.idxPartitionsByPType[partition.PType] = partition
 		}
 	}
 }
@@ -304,4 +314,14 @@ func (imglt *WkImageLayout) verifyPartitionConfiguration() {
 // GetConfig of the image layout
 func (imglt *WkImageLayout) GetConfig() *WkLayoutConf {
 	return imglt.conf
+}
+
+// GetPartitionByMountpoint returns partition by the mountpoint (e.g. "/", "/boot" etc)
+func (imglt *WkImageLayout) GetPartitionByMountpoint(mpt string) *WkLayoutConfPartition {
+	return imglt.idxPartitionsByMountpoint[mpt]
+}
+
+// GetPartitionByPType returns partition by its type in configuration file (efi, root etc)
+func (imglt *WkImageLayout) GetPartitionByPType(mpt string) *WkLayoutConfPartition {
+	return imglt.idxPartitionsByPType[mpt]
 }
