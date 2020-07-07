@@ -30,5 +30,6 @@ func (w *Waka) Build(force bool) {
 	w.mount()
 	w.bootstrap()
 	w.runCMS()
+	w.postProvision()
 	w.cleanup()
 }

@@ -40,6 +40,10 @@ func (w *Waka) bootstrap() {
 	ExitOnErrorPreamble(w.imageSetup.CopyPreRootFs(), "Unable to copy pre-install rootfs layout")
 }
 
+func (w *Waka) postProvision() {
+	ExitOnErrorPreamble(w.imageSetup.CopyPostRootFs(), "Unable to copy post-install rootfs layout")
+}
+
 // RunCMS on prepared image mount
 func (w *Waka) runCMS() {
 }
