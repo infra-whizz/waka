@@ -3,12 +3,15 @@ package waka
 import (
 	"fmt"
 
+	wzlib_subprocess "github.com/infra-whizz/wzlib/subprocess"
+
 	waka_diskman "github.com/infra-whizz/waka/diskman"
 )
 
 // Prepare environment, make disks, mount
 func (w *Waka) prepare(force bool) {
 	w.diskman = waka_diskman.NewWkDiskManager(w.imageLayout).SetTempDir(".")
+	w.imageSetup = NewWakaImageSetup(w.diskman, w.imageLayout)
 	if force {
 		ExitOnError(w.diskman.Remove())
 	}
@@ -33,6 +36,8 @@ func (w *Waka) format() {
 
 // Bootstrap basic components, setup CMS system
 func (w *Waka) bootstrap() {
+	ExitOnErrorPreamble(w.imageSetup.CopyPayload(), "Unable to copy payload")
+	ExitOnErrorPreamble(w.imageSetup.CopyPreRootFs(), "Unable to copy pre-install rootfs layout")
 }
 
 // RunCMS on prepared image mount

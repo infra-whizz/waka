@@ -8,6 +8,7 @@ import (
 type Waka struct {
 	imageLayout *waka_layout.WkImageLayout
 	diskman     *waka_diskman.WkDiskManager
+	imageSetup  *WakaImageSetup
 }
 
 func NewWaka() *Waka {
