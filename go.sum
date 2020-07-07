@@ -26,6 +26,8 @@ github.com/golang/protobuf v1.3.2/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5y
 github.com/golang/protobuf v1.3.4/go.mod h1:vzj43D7+SQXF/4pzW/hwtAqwc6iTitCiVSaWz5lYuqw=
 github.com/isbm/go-nanoconf v0.0.0-20200623180822-caf90de1965e h1:kweUDHNMkQyW5Q796u4LB5Gq6mBRGQRmhRCH0qtGWv4=
 github.com/isbm/go-nanoconf v0.0.0-20200623180822-caf90de1965e/go.mod h1:NeA3Yw/eieQ0XqBiftpafMaFVSwMgafNtjiLze95tys=
+github.com/isbm/go-shutil v0.0.0-20200707153448-f2775f0ddc3d h1:BpcI4pNw7LT91B7thBKIctoKsyTtv1aI0I407a7iSuY=
+github.com/isbm/go-shutil v0.0.0-20200707153448-f2775f0ddc3d/go.mod h1:rWX+sh7Ksqu3VvHXuvsbYeSbf/faaFSv0b9QA94lyO4=
 github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
 github.com/jinzhu/gorm v1.9.12/go.mod h1:vhTjlKSJUTWNtcbQtrMBFCxy7eXTzeCAzfL5fBZT/Qs=
 github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkryuEj+Srlc=
