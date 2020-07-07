@@ -35,7 +35,7 @@ func (w *Waka) format() {
 }
 
 // Bootstrap basic components, setup CMS system
-func (w *Waka) bootstrap() {
+func (w *Waka) preProvision() {
 	ExitOnErrorPreamble(w.imageSetup.CopyPayload(), "Unable to copy payload")
 	ExitOnErrorPreamble(w.imageSetup.CopyPreRootFs(), "Unable to copy pre-install rootfs layout")
 }

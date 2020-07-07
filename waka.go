@@ -28,7 +28,7 @@ func (w *Waka) Build(force bool) {
 	w.partitioning()
 	w.format()
 	w.mount()
-	w.bootstrap()
+	w.preProvision()
 	w.runCMS()
 	w.postProvision()
 	w.cleanup()
