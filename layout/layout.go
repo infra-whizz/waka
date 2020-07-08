@@ -56,15 +56,17 @@ func (partition *WkLayoutConfPartition) GetMountedAs() string {
 }
 
 type WkLayoutConf struct {
-	Path           string
-	Version        string
-	Name           string
-	Os             string
-	Size           int64
-	PackageManager string
-	Packages       []string
-	Partitions     []*WkLayoutConfPartition
-	Repositories   []string
+	Path         string
+	Version      string
+	Name         string
+	Os           string
+	Size         int64
+	Packages     []string
+	Partitions   []*WkLayoutConfPartition
+	Repositories []string
+
+	WzdBinPath     string
+	AnsibleVersion string
 }
 
 type WkImageLayout struct {
@@ -148,6 +150,18 @@ func (imglt *WkImageLayout) loadAndParse(schemaPath string) {
 
 // Set main data of the image
 func (imglt *WkImageLayout) setMainData(buff map[string]interface{}) {
+	wzdBin, ex := buff["wzd-bin"]
+	if !ex || wzdBin.(string) == "" {
+		wzdBin = "/usr/bin/wzd"
+	}
+	imglt.conf.WzdBinPath = wzdBin.(string)
+
+	ansibleVersion, ex := buff["ansible-version"]
+	if !ex || wzdBin.(string) == "" {
+		ansibleVersion = "2.9" // Max supported
+	}
+	imglt.conf.AnsibleVersion = ansibleVersion.(string)
+
 	name, ex := buff["name"]
 	if !ex || name.(string) == "" {
 		name = "untitled"
@@ -174,13 +188,6 @@ func (imglt *WkImageLayout) setMainData(buff map[string]interface{}) {
 		os.Exit(wzlib_utils.EX_GENERIC)
 	}
 	imglt.conf.Size = int64(imgSize.(int))
-
-	packman, ex := buff["package-manager"]
-	if !ex {
-		fmt.Fprintln(os.Stderr, "Error: unknown package manager")
-		os.Exit(wzlib_utils.EX_GENERIC)
-	}
-	imglt.conf.PackageManager = packman.(string)
 }
 
 // Read repositories

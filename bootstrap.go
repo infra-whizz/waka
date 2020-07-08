@@ -46,7 +46,7 @@ func (ims *WakaImageSetup) CopyPayload() error {
 		return err
 	}
 	src := path.Join(path.Dir(ims.layout.GetConfig().Path), "collection")
-	dst = path.Join(dst, "tmp", "waka-build", "collection")
+	dst = path.Join(dst, "tmp", ".waka", "collection")
 	return shutil.CopyTree(src, dst, &shutil.CopyTreeOptions{
 		Symlinks:               false,
 		Ignore:                 nil,
@@ -78,4 +78,15 @@ func (ims *WakaImageSetup) CopyPostRootFs() error {
 // CopyPreRootFs is copying the entire root FS from "pre-install" directory
 func (ims *WakaImageSetup) CopyPreRootFs() error {
 	return ims.copyRootFs("pre-install")
+}
+
+// CopyWhizzLocal is copying wzd client daemon, running in non-daemon
+// mode for local state orchestration.
+func (ims *WakaImageSetup) CopyWhizzLocal() error {
+	dst, err := ims.getRootPartitionMountpoint()
+	if err != nil {
+		return err
+	}
+	_, err = shutil.Copy(ims.layout.GetConfig().WzdBinPath, path.Join(dst, "tmp", ".waka", "bin"), false)
+	return err
 }
