@@ -1,0 +1,30 @@
+def kernel_directories(mode):
+    """
+    Mount linux kernel directories:
+    /proc
+    /dev
+    /var/run/dbus
+    """
+    directories = []
+    for target_src in ["/proc", "/dev", "/var/run/dbus"]:
+        path_src = "/tmp/test" + target_src
+        directories.append({
+            "path": path_src,
+            "src": target_src,
+            "fstype": "none",
+            "opts": "bind",
+            "state": mode,
+        })
+    return directories
+
+def mount_kernel_dirs():
+    """
+    Mount kernel directories
+    """
+    return kernel_directories("mounted")
+
+def umount_kernel_dirs():
+    """
+    Unmount kernel directories
+    """
+    return kernel_directories("unmounted")

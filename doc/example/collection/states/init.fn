@@ -1,0 +1,13 @@
+def doit():
+    return True
+
+def pinger():
+    texts = [
+        {"text": (os_get_environ("TEST") or "N/A")},
+    ]
+    return texts
+
+def addon():
+    return [
+        {"text": "addon"},
+    ]

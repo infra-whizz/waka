@@ -1,0 +1,23 @@
+def rootfs_packages():
+    """
+    List of packages in the rootfs.
+    """
+    root = "/tmp/test"
+    pipe_file = "/tmp/test.pipe.txt"
+    packages = [
+        "kernel-default",
+    ]
+
+    return [
+        {
+            "packages": packages,
+            "root": root,
+            "pipe_file": pipe_file,
+        },
+    ]
+    
+def pref():
+    """
+    Prefix
+    """
+    return "/tmp"
