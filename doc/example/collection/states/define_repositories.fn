@@ -2,7 +2,7 @@ def add_directories():
     """
     Return a list of directories tree, needed to be pre-defined.
     """
-    root = "/tmp/test"
+    root = os_get_environ("WAKA_MOUNT") or "/tmp/test"
     return [
         {
             "path": root + "/etc/zypp/repos.d",
@@ -16,7 +16,7 @@ def add_repositories():
     Return a list of repositories,
     needed for the bootstrap.
     """
-    root = "/tmp/test"
+    root = os_get_environ("WAKA_MOUNT") or "/tmp/test"
     return [
         {
             "repo": "http://download.opensuse.org/update/leap/15.2/oss/",

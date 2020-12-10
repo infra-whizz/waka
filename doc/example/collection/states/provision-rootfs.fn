@@ -2,7 +2,7 @@ def rootfs_packages():
     """
     List of packages in the rootfs.
     """
-    root = "/tmp/test"
+    root = os_get_environ("WAKA_MOUNT") or "/tmp/test"
     pipe_file = "/tmp/test.pipe.txt"
     packages = [
         "kernel-default",
