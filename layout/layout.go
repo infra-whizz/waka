@@ -207,12 +207,12 @@ func (imglt *WkImageLayout) setRepoList(buff map[string]interface{}) {
 func (imglt *WkImageLayout) setPackageList(buff map[string]interface{}) {
 	imglt.conf.Packages = make([]string, 0)
 	pkglist, ex := buff["packages"]
-	if !ex {
-		fmt.Fprintln(os.Stderr, "Error: no packages defined for the image")
-		os.Exit(wzlib_utils.EX_GENERIC)
-	}
-	for _, pkgname := range pkglist.([]interface{}) {
-		imglt.conf.Packages = append(imglt.conf.Packages, pkgname.(string))
+	if ex {
+		for _, pkgname := range pkglist.([]interface{}) {
+			imglt.conf.Packages = append(imglt.conf.Packages, pkgname.(string))
+		}
+	} else {
+		fmt.Fprintln(os.Stderr, "WARNING: no packages explicitly defined for the image")
 	}
 }
 
