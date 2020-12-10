@@ -23,7 +23,11 @@ func (dm *WkDiskManager) getDiskName() string {
 
 // Return disk path
 func (dm *WkDiskManager) getDiskPath() string {
-	return path.Join(path.Dir(dm.getDiskLayoutConfig().Path), "build", dm.getDiskName())
+	diskOutputRoot := dm.imgOutput
+	if diskOutputRoot == "" {
+		diskOutputRoot = path.Dir(dm.getDiskLayoutConfig().Path)
+	}
+	return path.Join(diskOutputRoot, "build", dm.getDiskName())
 }
 
 func (dm *WkDiskManager) createRawDisk() error {

@@ -24,10 +24,12 @@ import (
 
 // WkDiskManager object
 type WkDiskManager struct {
-	imglt   *waka_layout.WkImageLayout
-	parted  waka_parted.WakaPartitioner
-	tmpRoot string
-	tmpDir  string
+	imglt  *waka_layout.WkImageLayout
+	parted waka_parted.WakaPartitioner
+
+	imgOutput string
+	tmpRoot   string
+	tmpDir    string
 }
 
 // NewWkDiskManager creates a new disk manager instance.
@@ -39,6 +41,15 @@ func NewWkDiskManager(imglt *waka_layout.WkImageLayout) *WkDiskManager {
 	dm.tmpDir, err = ioutil.TempDir(dm.tmpRoot, "waka-build")
 	if err != nil {
 		panic(err)
+	}
+
+	return dm
+}
+
+// SetBuildOutput sets output of the built image other than $SCHEMA/build
+func (dm *WkDiskManager) SetBuildOutput(outputPath string) *WkDiskManager {
+	if outputPath != "" {
+		dm.imgOutput = outputPath
 	}
 
 	return dm
