@@ -172,6 +172,9 @@ class ChrootCaller:
         getattr(sys.modules[self.mod], self.args.func)()
 
     def run(self) -> None:
+        """
+        Run an Ansible module
+        """
         r, w = os.pipe() # these are file descriptors, not file objects
         pid = os.fork()
 
