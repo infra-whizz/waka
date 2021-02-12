@@ -175,7 +175,7 @@ class ChrootCaller:
         """
         Run an Ansible module
         """
-        r, w = os.pipe() # these are file descriptors, not file objects
+        #_, _ = os.pipe() # r and w are just file descriptors
         pid = os.fork()
 
         uid, gid = os.getuid(), os.getgid()
