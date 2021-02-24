@@ -61,7 +61,7 @@ func (w *Waka) runCMS() {
 	collection := path.Join(rootfs, "tmp", ".waka", "collection")
 
 	caller := wzlib_subprocess.NewEnvBufferedExec().SetEnv("WAKA_MOUNT", rootfs)
-	cmd, err := caller.Exec(wzdBinPath, "local", "-d", collection, "-s", "init")
+	cmd, err := caller.Exec(wzdBinPath, "local", "-r", rootfs, "-d", collection, "-s", "init")
 	ExitOnErrorPreamble(err, "Unable to run Whizz locally")
 	stout := strings.Split(cmd.StdoutString(), "\n")
 	sterr := strings.Split(cmd.StderrString(), "\n")
