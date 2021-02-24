@@ -52,7 +52,7 @@ func (ims *WakaImageSetup) CopyPayload() error {
 		Ignore:                 nil,
 		OverlayMode:            true,
 		CopyFunction:           shutil.Copy,
-		IgnoreDanglingSymlinks: false})
+		IgnoreDanglingSymlinks: true})
 }
 
 // Copy root FS.
@@ -67,7 +67,7 @@ func (ims *WakaImageSetup) copyRootFs(schema string) error {
 		Ignore:                 nil,
 		OverlayMode:            true,
 		CopyFunction:           shutil.Copy,
-		IgnoreDanglingSymlinks: false})
+		IgnoreDanglingSymlinks: true})
 }
 
 // CopyPostRootFs is copying the entire root FS from "post-install" directory
