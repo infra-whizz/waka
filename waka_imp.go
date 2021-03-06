@@ -1,6 +1,7 @@
 package waka
 
 import (
+	"encoding/json"
 	"fmt"
 	"path"
 	"strings"
@@ -61,20 +62,33 @@ func (w *Waka) runCMS() {
 	collection := path.Join(rootfs, "tmp", ".waka", "collection")
 
 	caller := wzlib_subprocess.NewEnvBufferedExec().SetEnv("WAKA_MOUNT", rootfs)
-	cmd, err := caller.Exec(wzdBinPath, "local", "-r", rootfs, "-d", collection, "-s", "init")
+	cmd, err := caller.Exec(wzdBinPath, "-f", "json", "local", "-r", rootfs, "-d", collection, "-s", "init")
 	ExitOnErrorPreamble(err, "Unable to run Whizz locally")
 	stout := strings.Split(cmd.StdoutString(), "\n")
 	sterr := strings.Split(cmd.StderrString(), "\n")
 	cmd.Wait()
 
-	for _, line := range stout {
-		line = strings.TrimSpace(line)
-		w.GetLogger().Info(line)
-	}
-
-	for _, line := range sterr {
-		line = strings.TrimSpace(line)
-		w.GetLogger().Error(line)
+	// Each line expected to be a JSON. Otherise passed "as is".
+	var buff map[string]string
+	for _, out := range [][]string{stout, sterr} {
+		for _, line := range out {
+			line = strings.TrimSpace(line)
+			err = json.Unmarshal([]byte(line), &buff)
+			if err != nil {
+				w.GetLogger().Info(line)
+			} else {
+				switch buff["level"] {
+				case "debug":
+					w.GetLogger().Debug(buff["msg"])
+				case "error":
+					w.GetLogger().Error(buff["msg"])
+				case "warning":
+					w.GetLogger().Warning(buff["msg"])
+				default:
+					w.GetLogger().Info(buff["msg"])
+				}
+			}
+		}
 	}
 }
 
