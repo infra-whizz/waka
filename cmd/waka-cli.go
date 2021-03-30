@@ -9,6 +9,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+var VERSION string = "0.9"
+
 // Description builder
 func descriptionBuilder(ctx *cli.Context) error {
 	cli.ShowAppHelpAndExit(ctx, 1)
@@ -34,7 +36,7 @@ func main() {
 	confpath := nanoconf.NewNanoconfFinder(appname).DefaultSetup(nil)
 
 	app := &cli.App{
-		Version: "0.1 Alpha",
+		Version: VERSION,
 		Name:    appname,
 		Usage:   "image builder with config mgmt powers",
 	}
