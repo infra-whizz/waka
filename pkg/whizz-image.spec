@@ -14,7 +14,7 @@ Source1:        vendor.tar.gz
 
 BuildRequires:  golang-packaging
 BuildRequires:  golang(API) >= 1.13
-Requires:       whizz-clientx
+Requires:       whizz-client
 
 %description
 Whizz-based image generator, which is using generic Ansible modules
