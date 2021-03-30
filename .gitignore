@@ -11,3 +11,4 @@ vendor/
 doc/
 cmd/waka
 cmd/dev-run.sh
+pkg/*tar.gz
