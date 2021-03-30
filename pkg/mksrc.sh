@@ -3,7 +3,7 @@
 # Configuration
 P_NAME="whizz-image"
 P_APP="cmd/waka-cli.go"
-P_SRC_DIRS=("layout" "diskman" "cmd")
+P_SRC_DIRS=("layout" "diskman" "diskman/parted" "cmd")
 P_DOC_DIRS=("etc")
 P_FILES=("LICENSE" "README.md" "go.mod" "go.sum" "utils.go" "waka.go" "waka_imp.go" "formatter.go" "bootstrap.go" "devmount.go")
 P_CMD=("Makefile")
